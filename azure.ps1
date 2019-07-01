@@ -56,8 +56,7 @@ Write-Output("-- Public IP Space --")
 Get-AzureRmPublicIPAddress
 
 Write-Output("==== Network Security Groups ====")
-# TODO: Gives no output needs fixing
-# perhaps because I have no networkInterfaces
+
 foreach($vm in $vms){
 	$vm.Name
 	$ni = Get-AzureRmNetworkInterface | where {$_.Id -eq $vm.NetworkInterfaceIDs}
@@ -135,9 +134,7 @@ foreach($vm in $vms){
 		$excel.cells.item($row,$column) = $_.Name
 		$column = $column + 1
 	}
-	foreach($vm in $vms){
-		
-	}
+
 	break
 }
 

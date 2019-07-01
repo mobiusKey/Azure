@@ -5,7 +5,7 @@
 
 
 Write-Output("==== Users ====")
-$users = Get-AzureRmADUser -First 10 -searchstring "guest"
+$users = Get-AzureRmADUser
 $users
 
 $excel = New-Object -ComObject excel.application
@@ -31,7 +31,8 @@ $row = $row + 1
 
 
 foreach($user in $users){
-	
+	Write-Output("UserType:")
+	$user.UserType
 	$user.PSObject.Properties | ForEach-Object {
 		if ($_.Value -ne $null -and $_.Value.count -ne 0 -and $_.Name -ne "Id"){
 		$excel.cells.item($row,$column) = $_.Value
