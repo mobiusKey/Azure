@@ -1,5 +1,6 @@
 # Before running the script:
 # * Run: Import-Module Azure
+# Run Install-Module -Name AzureRM -AllowClobber
 # * Authenticate to Azure in PowerShell using Login-AzureRmAccount
 
 
@@ -91,9 +92,13 @@ $excel = New-Object -ComObject excel.application
 $excel.visible = $True
 $workbook = $excel.WorkBooks.Add()
 $workbook.WorkSheets.Item(1).Name = "Resource Groups"
+$worksheet = $workbook.worksheets.Item(1)
 $row = 1
 $column = 1
-# Bad WaySet Column Headers
+
+# Resource Groups
+
+# Bad Way to Set Column Headers
 foreach($rg in $resourceGroup){
 	$rg.PSObject.Properties | ForEach-Object {
 		$excel.cells.item($row,$column) = $_.Name
@@ -103,12 +108,12 @@ foreach($rg in $resourceGroup){
 }
 $column = 1
 $row = $row + 1
-$list = {}
-# TODO: Fix breaks when tag is an empty list {} but output still works
+# TODO: Fix breaks when tag is an empty list {}
 foreach($rg in $resourceGroup){
 	$rg.PSObject.Properties | ForEach-Object {
-		if ($_.Value -ne $null -or $_.Value -ne $list){
+		if ($_.Value -ne $null -and $_.Value.count -ne 0){
 		$excel.cells.item($row,$column) = $_.Value
+		
 		}else{
 		$excel.cells.item($row,$column) = ""
 		}
@@ -116,5 +121,48 @@ foreach($rg in $resourceGroup){
 	}
 	$column = 1
 	$row = $row + 1
-	$rg
 }
+
+# Web Apps
+$worksheet = $workbook.worksheets.add($worksheet)
+$worksheet.Name = "Virtual Machines"
+
+$column = 1
+$row = 1
+# Column Names
+foreach($vm in $vms){
+	$vm.PSObject.Properties | ForEach-Object {
+		$excel.cells.item($row,$column) = $_.Name
+		$column = $column + 1
+	}
+	foreach($vm in $vms){
+		
+	}
+	break
+}
+
+foreach($vm in $vms){
+	$vm.HardwareProfile.PSObject.Properties | ForEach-Object {
+		$excel.cells.item($row,$column) = $_.Name
+		$column = $column + 1
+	}
+	break
+}
+$column = 1
+$row = $row + 1
+
+# values
+<# foreach($vm in $vms){
+	$vm.PSObject.Properties | ForEach-Object {
+		if ($_.Value -ne $null -and $_.Value.count -ne 0){
+		$excel.cells.item($row,$column) = $_.Value
+		
+		}else{
+		$excel.cells.item($row,$column) = ""
+		}
+		$column = $column + 1
+	}
+
+	$column = 1
+	$row = $row + 1
+} #>
