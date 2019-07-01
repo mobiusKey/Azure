@@ -5,7 +5,8 @@
 
 
 Write-Output("==== Users ====")
-$users = Get-AzureRmADUser -First 10
+$users = Get-AzureRmADUser -First 10 -searchstring "guest"
+$users
 
 $excel = New-Object -ComObject excel.application
 $excel.visible = $True
@@ -26,18 +27,25 @@ foreach($user in $users){
 
 $column = 1
 $row = $row + 1
-$users
+
+
+
 foreach($user in $users){
 	
 	$user.PSObject.Properties | ForEach-Object {
 		if ($_.Value -ne $null -and $_.Value.count -ne 0 -and $_.Name -ne "Id"){
 		$excel.cells.item($row,$column) = $_.Value
+		
+		}
+		else{
+		if($_.Value -ne $null -and $_.Value.count -ne 0 -and $_.Name -eq "Id"){
+			$excel.cells.item($row,$column) = $_.Value.Guid
 		}else{
 		$excel.cells.item($row,$column) = ""
+		}
 		}
 		$column = $column + 1
 	}
 	$column = 1
 	$row = $row + 1
 }
-
