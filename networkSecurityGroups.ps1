@@ -4,6 +4,19 @@
 # * Authenticate to Azure in PowerShell using Login-AzureRmAccount
 
 
+function arrayToString {
+	if($args[0] -ne $null){ 
+	$string = ""
+	$args[0]
+	foreach($element in $args[0]){
+		$string += $element + " "
+	}
+	return $string
+	}
+	return "NULL"
+}
+
+
 Write-Output("==== Network Security Groups ====")
 $securityGroups = Get-AzureRmNetworkSecurityGroup
 $securityGroups
@@ -88,17 +101,17 @@ foreach($group in $securityGroups){
 					switch($_.Name){
 						"Description" {$excel.cells.item($row,$column) = $value.Description; break}
 						"Protocol" {$excel.cells.item($row,$column) = $value.Protocol; break}
-						"SourcePortRange" {$excel.cells.item($row,$column) = $value.SourcePortRange[0]; break}
-						"DestinationPortRange" {$excel.cells.item($row,$column) = $value.DestinationPortRange[0]; break}
-						"SourceAddressPrefix" {$excel.cells.item($row,$column) = $value.SourceAddressPrefix[0]; break}
-						"DestinationAddressPrefix" {$excel.cells.item($row,$column) = $value.DestinationAddressPrefix[0]; break}
+						"SourcePortRange" {$excel.cells.item($row,$column) = arrayToString($value.SourcePortRange); break}
+						"DestinationPortRange" {$excel.cells.item($row,$column) = arrayToString($value.DestinationPortRange); break}
+						"SourceAddressPrefix" {$excel.cells.item($row,$column) = arrayToString($value.SourceAddressPrefix); break}
+						"DestinationAddressPrefix" {$excel.cells.item($row,$column) = arrayToString($value.DestinationAddressPrefix); break}
 						"Access" {$excel.cells.item($row,$column) = $value.Access; break}
 						"Priority" {$excel.cells.item($row,$column) = $value.Priority; break}
 						"Direction" {$excel.cells.item($row,$column) = $value.Direction; break}
 						"ProvisioningState" {$excel.cells.item($row,$column) = $value.ProvisioningState; break}
-						"SourceApplicationSecurityGroups" {$excel.cells.item($row,$column) = $value.SourceApplicationSecurityGroups[0]; break}
+						"SourceApplicationSecurityGroups" {$excel.cells.item($row,$column) = arrayToString($value.SourceApplicationSecurityGroups); break}
 						"SourceApplicationSecurityGroupsText" {$excel.cells.item($row,$column) = $value.SourceApplicationSecurityGroupsText; break}
-						"DestinationApplicationSecurityGroups" {$excel.cells.item($row,$column) = $value.DestinationApplicationSecurityGroups[0]; break}
+						"DestinationApplicationSecurityGroups" {$excel.cells.item($row,$column) = arrayToString($value.DestinationApplicationSecurityGroups); break}
 						"DestinationApplicationSecurityGroupsText" {$excel.cells.item($row,$column) = $value.DestinationApplicationSecurityGroupsText; break}
 						"Name" {$excel.cells.item($row,$column) = $value.Name; break}
 						"Etag" {$excel.cells.item($row,$column) = $value.Etag; break}
@@ -168,6 +181,7 @@ foreach($group in $securityGroups){
 						"Name" {$excel.cells.item($row,$column) = $value.Name; break}
 						"Etag" {$excel.cells.item($row,$column) = $value.Etag; break}
 						"Id" {$excel.cells.item($row,$column) = $value.Id; break}
+						
 						default {$excel.cells.item($row,$column) = "Error"}
 					}
 					
@@ -215,14 +229,14 @@ foreach($interface in $interfaces){
 						"VirtualMachine" {$excel.cells.item($row,$column) = $value.Id; break}
 						# contains if IPv4, Name, Primary, private addresss,  PrivateIpAllocationMethod 
 						"IpConfigurations" {$excel.cells.item($row,$column) = $value.Name; break}
-						"TapConfigurations" {$excel.cells.item($row,$column) = $value[0]; break}
+						"TapConfigurations" {$excel.cells.item($row,$column) = arrayToString($value); break}
 						# contains DnsServers, AppliedDnsServers, Internal, DnsNameLabel, InternalFqdn, InternalDomainNameSuffix, DnsServersText, AppliedDnsServersText
 						"DnsSettings" {$excel.cells.item($row,$column) = $value.DnsNameLabel; break}
 						"MacAddress" {$excel.cells.item($row,$column) = $value; break}
 						"Primary" {$excel.cells.item($row,$column) = $value; break}
 						"EnableAcceleratedNetworking" {$excel.cells.item($row,$column) = $value; break}
 						"EnableIPForwarding" {$excel.cells.item($row,$column) = $value; break}
-						"HostedWorkloads" {$excel.cells.item($row,$column) = $value[0]; break}
+						"HostedWorkloads" {$excel.cells.item($row,$column) = arrayToString($value); break}
 						# contains ResourceGroupName Name Location ProvisioningState
 						#"NetworkSecurityGroup" {$sg = Get-AzureRmEffectiveNetworkSecurityGroup	-ResourceGroupName $interface.ResourceGroupName  -NetworkInterfaceName $interface.Name; $excel.cells.item($row,$column) = $sg.NetworkSecurityGroup.Id; break}
 						"NetworkSecurityGroup" {$excel.cells.item($row,$column) = $value.Id; break}
@@ -285,16 +299,16 @@ foreach($group in $securityGroups){
 					
 					switch($_.Name){
 						"AddressPrefix" {$excel.cells.item($row,$column) = $value.AddressPrefix; break}
-						"IpConfigurations" {$excel.cells.item($row,$column) = $value.IpConfigurations[0]; break}
-						"ServiceAssociationLinks" {$excel.cells.item($row,$column) = $value.ServiceAssociationLinks[0]; break}
-						"ResourceNavigationLinks" {$excel.cells.item($row,$column) = $value.ResourceNavigationLinks[0]; break}
-						# check if this is right
+						"IpConfigurations" {$excel.cells.item($row,$column) = $value.IpConfigurations.Name; break}
+						"ServiceAssociationLinks" {$excel.cells.item($row,$column) = arrayToString($value.ServiceAssociationLinks); break}
+						"ResourceNavigationLinks" {$excel.cells.item($row,$column) = arrayToString($value.ResourceNavigationLinks); break}
+						# TODO: Can a subnet have multiple network security groups?
 						"NetworkSecurityGroup" {$excel.cells.item($row,$column) = $group.Id; break}
 						"RouteTable" {$excel.cells.item($row,$column) = $value.RouteTable; break}
-						"ServiceEndpoints" {$excel.cells.item($row,$column) = $value.ServiceEndpoints[0]; break}
-						"ServiceEndpointPolicies" {$excel.cells.item($row,$column) = $value.ServiceEndpointPolicies[0]; break}
-						"Delegations" {$excel.cells.item($row,$column) = $value.Delegations[0]; break}
-						"InterfaceEndpoints" {$excel.cells.item($row,$column) = $value.InterfaceEndpoints[0]; break}
+						"ServiceEndpoints" {$excel.cells.item($row,$column) = arrayToString($value.ServiceEndpoints); break}
+						"ServiceEndpointPolicies" {$excel.cells.item($row,$column) = arrayToString($value.ServiceEndpointPolicies); break}
+						"Delegations" {$excel.cells.item($row,$column) = arrayToString($value.Delegations); break}
+						"InterfaceEndpoints" {$excel.cells.item($row,$column) = arrayToString($value.InterfaceEndpoints); break}
 						"ProvisioningState" {$excel.cells.item($row,$column) = $value.ProvisioningState; break}
 						"IpConfigurationsText" {$excel.cells.item($row,$column) = $value.IpConfigurationsText; break}
 						"ServiceAssociationLinksText" {$excel.cells.item($row,$column) = $value.ServiceAssociationLinksText; break}
@@ -349,14 +363,22 @@ foreach($network in $networks){
 	$worksheet.Rows($row).RowHeight = 15
 	$row = $row + 1
 
+
 foreach($network in $networks){
 	$network.PSObject.Properties | ForEach-Object {
 						$value = $_.Value
 						Write-Output($_.Name + ": " +$value)
 						switch($_.Name){
-						"AddressSpace" {$excel.cells.item($row,$column) = $value.AddressPrefixes[0]; break}
+						# TODO: Fix Address Space output
+						"AddressSpace" {$excel.cells.item($row,$column) = $network.AddressSpace.AddressPrefixesText; break}
 						"DhcpOptions" {$excel.cells.item($row,$column) = $value; break}
-						"Subnets" {$excel.cells.item($row,$column) = $value.Name;break}
+						"Subnets" {
+							$substring = ""
+							foreach($sub in $value){
+							$substring += $sub.Id + " "
+							$excel.cells.item($row,$column) = $substring
+						}
+						break}
 						"VirtualNetworkPeerings" {$excel.cells.item($row,$column) = $value.Name; break}
 						"ProvisioningState" {$excel.cells.item($row,$column) = $value; break}
 						"EnableDdosProtection" {$excel.cells.item($row,$column) = $value; break}
@@ -386,7 +408,9 @@ foreach($network in $networks){
 					$column = 1
 					$worksheet.Rows($row).RowHeight = 15
 					$row = $row + 1
-					$subnets.add($network.Subnets)
+					foreach($net in $network.Subnets){
+						$subnets.add($net)
+					}
 	}
 	
 	Write-Output("==== All Subnets =====")
@@ -397,43 +421,44 @@ foreach($network in $networks){
 	$row = 1
 	
 	# TODO: programatically add column names and values instead of hardcoded column names etc
-			$excel.cells.item($row,$column) ="AddressPrefix"
-			$excel.cells.item($row,$column + 1) ="IpConfigurations"	
-			$excel.cells.item($row,$column + 2) ="ServiceAssociationLinks"	
-			$excel.cells.item($row,$column + 3) ="ResourceNavigationLinks"	
-			$excel.cells.item($row,$column + 4) ="NetworkSecurityGroup"	
-			$excel.cells.item($row,$column + 5) ="RouteTable"	
-			$excel.cells.item($row,$column + 6) ="ServiceEndpoints"	
-			$excel.cells.item($row,$column + 7) ="ServiceEndpointPolicies"	
-			$excel.cells.item($row,$column + 8) ="Delegations"	
-			$excel.cells.item($row,$column + 9) ="InterfaceEndpoints"	
-			$excel.cells.item($row,$column + 10) ="ProvisioningState"	
-			$excel.cells.item($row,$column + 11) ="IpConfigurationsText"	
-			$excel.cells.item($row,$column + 12) ="ServiceAssociationLinksText"	
-			$excel.cells.item($row,$column + 13) ="ResourceNavigationLinksText"	
-			$excel.cells.item($row,$column + 14) ="NetworkSecurityGroupText"	
-			$excel.cells.item($row,$column + 15) ="RouteTableText"	
-			$excel.cells.item($row,$column + 16) ="ServiceEndpointText"	
-			$excel.cells.item($row,$column + 17) ="ServiceEndpointPoliciesText"	
-			$excel.cells.item($row,$column + 18) ="InterfaceEndpointsText"	
-			$excel.cells.item($row,$column + 19) ="DelegationsText"	
-			$excel.cells.item($row,$column + 20) ="Name"	
-			$excel.cells.item($row,$column + 21) ="Etag"	
-			$excel.cells.item($row,$column + 22) ="Id"
+			$excel.cells.item($row,$column) = "AddressPrefix"
+			$excel.cells.item($row,$column + 1) = "IpConfigurations"	
+			$excel.cells.item($row,$column + 2) = "ServiceAssociationLinks"	
+			$excel.cells.item($row,$column + 3) = "ResourceNavigationLinks"	
+			$excel.cells.item($row,$column + 4) = "NetworkSecurityGroup"	
+			$excel.cells.item($row,$column + 5) = "RouteTable"	
+			$excel.cells.item($row,$column + 6) = "ServiceEndpoints"	
+			$excel.cells.item($row,$column + 7) = "ServiceEndpointPolicies"	
+			$excel.cells.item($row,$column + 8) = "Delegations"	
+			$excel.cells.item($row,$column + 9) = "InterfaceEndpoints"	
+			$excel.cells.item($row,$column + 10) = "ProvisioningState"	
+			$excel.cells.item($row,$column + 11) = "IpConfigurationsText"	
+			$excel.cells.item($row,$column + 12) = "ServiceAssociationLinksText"	
+			$excel.cells.item($row,$column + 13) = "ResourceNavigationLinksText"	
+			$excel.cells.item($row,$column + 14) = "NetworkSecurityGroupText"	
+			$excel.cells.item($row,$column + 15) = "RouteTableText"	
+			$excel.cells.item($row,$column + 16) = "ServiceEndpointText"	
+			$excel.cells.item($row,$column + 17) = "ServiceEndpointPoliciesText"	
+			$excel.cells.item($row,$column + 18) = "InterfaceEndpointsText"	
+			$excel.cells.item($row,$column + 19) = "DelegationsText"	
+			$excel.cells.item($row,$column + 20) = "Name"	
+			$excel.cells.item($row,$column + 21) = "Etag"	
+			$excel.cells.item($row,$column + 22) = "Id"
 
 			$column = 1
 			$row = $row + 1
 			foreach($subnet in $subnets){
-			$excel.cells.item($row,$column) = $subnet.AddressPrefix
-			$excel.cells.item($row,$column + 1) = $subnet.IpConfigurations.Id
-			$excel.cells.item($row,$column + 2) = $subnet.ServiceAssociationLinks
-			$excel.cells.item($row,$column + 3) = $subnet.ResourceNavigationLinks
+			$excel.cells.item($row,$column) = arrayToString($subnet.AddressPrefix)
+			# TODO: make list to string
+			$excel.cells.item($row,$column + 1) = $subnet.IpConfigurations.Name
+			$excel.cells.item($row,$column + 2) = arrayToString($subnet.ServiceAssociationLinks)
+			$excel.cells.item($row,$column + 3) = arrayToString($subnet.ResourceNavigationLinks)
 			$excel.cells.item($row,$column + 4) = $subnet.NetworkSecurityGroup.Id
-			$excel.cells.item($row,$column + 5) = $subnet.RouteTable
-			$excel.cells.item($row,$column + 6) = $subnet.ServiceEndpoints
-			$excel.cells.item($row,$column + 7) = $subnet.ServiceEndpointPolicies	
-			$excel.cells.item($row,$column + 8) = $subnet.Delegations
-			$excel.cells.item($row,$column + 9) = $subnet.InterfaceEndpoints
+			$excel.cells.item($row,$column + 5) = $subnet.RouteTable.Id
+			$excel.cells.item($row,$column + 6) = arrayToString($subnet.ServiceEndpoints)
+			$excel.cells.item($row,$column + 7) = arrayToString($subnet.ServiceEndpointPolicies)	
+			$excel.cells.item($row,$column + 8) = arrayToString($subnet.Delegations)
+			$excel.cells.item($row,$column + 9) = arrayToString($subnet.InterfaceEndpoints)
 			$excel.cells.item($row,$column + 10) = $subnet.ProvisioningState	
 			$excel.cells.item($row,$column + 11) = $subnet.IpConfigurationsText	
 			$excel.cells.item($row,$column + 12) = $subnet.ServiceAssociationLinksText	
@@ -450,6 +475,238 @@ foreach($network in $networks){
 			
 			$worksheet.Rows($row).RowHeight = 15
 			$row = $row + 1
-			}
+			
+	}
+	
+	# Virtual Machines
+	# TODO: Check Extensions for Endpoint protections
+	Write-Output("========= Virtual Machines ==========")
+
+$vms = Get-AzureRmVM
+$vms
+$worksheet = $workbook.worksheets.add($worksheet)
+$worksheet.Name = "Virtual Machines"
+$column = 1
+$row = 1
+
+
+foreach($vm in $vms){
+	$vm.PSObject.Properties | ForEach-Object {
+					if($_.Name -eq "OSProfile" -or $_.Name -eq "StorageProfile"){
+						if($_.Name -eq "OSProfile"){
+							$excel.cells.item($row,$column) = $_.Name
+							#Using this value for the OSProfile field
+							# $excel.cells.item($row,$column + 1) = "ComputerName"
+							$excel.cells.item($row,$column + 1) = "AdminUsername"
+							$excel.cells.item($row,$column + 2) = "AdminPassword"
+							$excel.cells.item($row,$column + 3) = "CustomData"
+							$excel.cells.item($row,$column + 4) = "WindowsConfiguration"
+							$excel.cells.item($row,$column + 5) = "Secrets"
+								$column = $column + 6
+						}
+						if($_.Name -eq "StorageProfile"){
+							$excel.cells.item($row,$column) = $_.Name
+							$excel.cells.item($row,$column + 1) = "Offer"
+							$excel.cells.item($row,$column + 2) = "Sku"
+							$excel.cells.item($row,$column + 3) = "Version"
+								$column = $column + 4
+						}
+					}
+					else{
+					$excel.cells.item($row,$column) = $_.Name
+					$column = $column + 1
+					}	
+					Write-Output($_.Name + ": " + $_.Value)
+		}
+		
+		$column = 1
+		break
+	}
+	$column = 1
+	$worksheet.Rows($row).RowHeight = 15
+	$row = $row + 1
+
+foreach($vm in $vms){
+	$vm.PSObject.Properties | ForEach-Object {
+						$value = $_.Value
+						Write-Output($_.Name + ": " +$value)
+						switch($_.Name){
+						
+						"ResourceGroupName" {$excel.cells.item($row,$column) = $value; break}
+						"Id" {$excel.cells.item($row,$column) = $value; break}
+						"VmId" {$excel.cells.item($row,$column) = $value; break}	
+						"Name" {$excel.cells.item($row,$column) = $value; break}	
+						"Type" {$excel.cells.item($row,$column) = $value; break}	
+						"Location" {$excel.cells.item($row,$column) = $value; break}	
+						"LicenseType" {$excel.cells.item($row,$column) = $value; break}	
+						"Tags" {$excel.cells.item($row,$column) = $value[0]; break}	
+						"AvailabilitySetReference" {$excel.cells.item($row,$column) = $value; break}	
+						"DiagnosticsProfile" {$excel.cells.item($row,$column) = $value; break}	
+						"Extensions" {$excel.cells.item($row,$column) = $value[0]; break}	
+						"HardwareProfile" {$excel.cells.item($row,$column) = $value.VmSize; break}	
+						"InstanceView"	{$excel.cells.item($row,$column) = $value; break}
+						"NetworkProfile" {
+							$string = ""
+							foreach($interface in $value.NetworkInterfaces){
+								$string += $interface.Id
+							
+							}
+							$excel.cells.item($row,$column) = $string
+							break
+						}	
+						# Check if Password Authentication is enabled?
+						# Check Windows and Linux Configurations? here or in another excel workbook?
+						"OSProfile" {
+							$excel.cells.item($row,$column) = $value.ComputerName
+							$excel.cells.item($row,$column + 1) = $value.AdminUsername
+							$excel.cells.item($row,$column + 2) = $value.AdminPassword
+							$excel.cells.item($row,$column + 3) = $value.CustomData
+							$excel.cells.item($row,$column + 4) = $value.WindowsConfiguration
+							$excel.cells.item($row,$column + 5) = arrayToString($value.Secrets)
+							$column = $column + 5
+							break
+						}	
+						"Plan" {$excel.cells.item($row,$column) = $value; break}	
+						"ProvisioningState" {$excel.cells.item($row,$column) = $value; break}	
+						"StorageProfile" {
+							$excel.cells.item($row,$column) = $value.ImageReference.Publisher
+							$excel.cells.item($row,$column + 1) = $value.ImageReference.Offer
+							$excel.cells.item($row,$column + 2) = $value.ImageReference.Sku
+							$excel.cells.item($row,$column + 3) = $value.ImageReference.Version
+							#skipping Id to avoid confusion with VM Id
+							$column = $column + 3
+							break
+						}	
+						"DisplayHint" {$excel.cells.item($row,$column) = $value; break}	
+						"Identity" {$excel.cells.item($row,$column) = $value; break}	
+						"Zones" {$excel.cells.item($row,$column) = $value[0]; break}	
+						"FullyQualifiedDomainName" {$excel.cells.item($row,$column) = $value; break}
+						"AdditionalCapabilities" {$excel.cells.item($row,$column) = $value; break}	
+						"RequestId" {$excel.cells.item($row,$column) = $value; break}	
+						"StatusCode" {$excel.cells.item($row,$column) = $value; break}
+											
+						default {$excel.cells.item($row,$column) = "Error"}
+					}
+					$column = $column + 1
+		}
+					$column = 1
+					$worksheet.Rows($row).RowHeight = 15
+					$row = $row + 1
+	}
+	
+	
+	# Application Gateways and Firewalls (Web App and Next Gen Firewalls)
+	Write-Output("========= Application Gateways ==========")
+
+$gateways = Get-AzureRmApplicationGateway
+$gateways
+$worksheet = $workbook.worksheets.add($worksheet)
+$worksheet.Name = "Application Gateways"
+
+$column = 1
+$row = 1
+
+
+foreach($gate in $gateways){
+	$gate.PSObject.Properties | ForEach-Object {
+					$excel.cells.item($row,$column) = $_.Name
+					Write-Output($_.Name + ": " + $_.Value)
+					$column = $column + 1
+		}
+		
+		$column = 1
+		break
+	}
+	$column = 1
+	$worksheet.Rows($row).RowHeight = 15
+	$row = $row + 1
+
+	foreach($gate in $gateways){
+	$gate.PSObject.Properties | ForEach-Object {
+		$value = $_.Value
+		Write-Output($_.Name + ": " +$value)
+		switch($_.Name){
+			
+			# Object
+			"Sku" {$excel.cells.item($row,$column) = $value.Name; break}
+			# Object
+			"SslPolicy"	{$excel.cells.item($row,$column) = $value.Id; break}
+			# List of Objects
+			"GatewayIPConfigurations" {$excel.cells.item($row,$column) = $value[0].Name; break}	
+			"AuthenticationCertificates" {$excel.cells.item($row,$column) = arrayToString($value); break}	
+			"SslCertificates" {$excel.cells.item($row,$column) = arrayToString($value); break}	
+			#List of Objects
+			"TrustedRootCertificates" {$excel.cells.item($row,$column) = arrayToString($value); break}	
+			#List of Objects
+			"FrontendIPConfigurations" {$excel.cells.item($row,$column) = $value[0].Name; break}	
+			#List of Objects
+			"FrontendPorts" {$excel.cells.item($row,$column) = $value[0].Port; break}	
+			#List of Objects
+			"Probes" {$excel.cells.item($row,$column) = arrayToString($value); break}	
+			#List of Objects
+			"BackendAddressPools" {$excel.cells.item($row,$column) = $value[0].Name; break}	
+			#List of Objects
+			"BackendHttpSettingsCollection"	{$excel.cells.item($row,$column) = $value[0].Name; break}
+			# List of Objects
+			"HttpListeners"	{$excel.cells.item($row,$column) = $value[0].Name; break}
+			#List of Objects
+			"UrlPathMaps" {$excel.cells.item($row,$column) = arrayToString($value); break}	
+			#Object 
+			"RequestRoutingRules" {$excel.cells.item($row,$column) = $value.Id; break}	
+			"RedirectConfigurations" {$excel.cells.item($row,$column) = $value.Id; break}	
+			#Object
+			"WebApplicationFirewallConfiguration" {$excel.cells.item($row,$column) = $value.Id; break}	
+			# Object
+			"AutoscaleConfiguration" {$excel.cells.item($row,$column) = $value.Id; break}	
+			"CustomErrorConfigurations"	{$excel.cells.item($row,$column) = arrayToString($value); break}
+			"EnableHttp2" {$excel.cells.item($row,$column) = $value; break}	
+			# TODO: Create a bool to string function
+			"EnableFips" {$excel.cells.item($row,$column) = $value; break}	
+			"Zones" {$excel.cells.item($row,$column) = arrayToString($value); break}	
+			"OperationalState" {$excel.cells.item($row,$column) = $value; break}	
+			"ProvisioningState" {$excel.cells.item($row,$column) = $value; break}	
+			"GatewayIpConfigurationsText" {$excel.cells.item($row,$column) = $value; break}	
+			"AuthenticationCertificatesText" {$excel.cells.item($row,$column) = $value; break}	
+			"SslCertificatesText" {$excel.cells.item($row,$column) = $value; break}	
+			"FrontendIpConfigurationsText" {$excel.cells.item($row,$column) = $value; break}	
+			"FrontendPortsText" {$excel.cells.item($row,$column) = $value; break}	
+			"BackendAddressPoolsText" {$excel.cells.item($row,$column) = $value; break}	
+			"BackendHttpSettingsCollectionText" {$excel.cells.item($row,$column) = $value; break}	
+			"HttpListenersText" {$excel.cells.item($row,$column) = $value; break}	
+			"RequestRoutingRulesText" {$excel.cells.item($row,$column) = $value; break}	
+			"ProbesText" {$excel.cells.item($row,$column) = $value; break}	
+			"UrlPathMapsText" {$excel.cells.item($row,$column) = $value; break}	
+			"ResourceGroupName" {$excel.cells.item($row,$column) = $value; break}	
+			"Location" {$excel.cells.item($row,$column) = $value; break}	
+			"ResourceGuid" {$excel.cells.item($row,$column) = $value; break}	
+			"Type" {$excel.cells.item($row,$column) = $value.Id; break}	
+			"Tag" {$excel.cells.item($row,$column) = $value; break}	
+			"TagsTable" {$excel.cells.item($row,$column) = $value; break}	
+			"Name" {$excel.cells.item($row,$column) = $value; break}	
+			"Etag" {$excel.cells.item($row,$column) = $value; break}	
+			"Id" {$excel.cells.item($row,$column) = $value; break}
+
+			
+			default {$excel.cells.item($row,$column) = "Error"}
+					}
+		$column = $column + 1
+		}
+		$column = 1
+		$worksheet.Rows($row).RowHeight = 15
+		$row = $row + 1
+	}
+	
+	
+
+
+	#DDoS Protection
+	# Domain Names
+	
+	# In other scripts
+	# Logging and Monitoring 
+	# Users
+		# Owner Accounts
+		# MFA
+	
 	
 Write-Output("Done") 
