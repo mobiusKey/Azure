@@ -27,8 +27,9 @@ $DataSource = Get-Location
 $DataSource = $DataSource.Path + "\Test.SQLite"
 
 # Network Security Groups
-# TABLES NSG, SecurityRules, DefaultSecurityRules, Subnets, NetworkInterfaces
-$Query = "CREATE TABLE NetworkSecurityGroup (
+# NSG are applied to Subnets, NetworkInterfaces, and VirtualMachines
+# DefaultSecurityRules and SecurityRules TABLEs are created to better document rulesets
+$Query = "CREATE TABLE NetworkSecurityGroups (
 	SecurityRules TEXT,
 	DefaultSecurityRules TEXT,
 	NetworkInterfaces TEXT,
@@ -105,7 +106,7 @@ Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
 
 #VirtualMachines
-$Query = "CREATE TABLE VirtualMachine (
+$Query = "CREATE TABLE VirtualMachines (
 	ResourceGroupName TEXT,
 	Id TEXT PRIMARY KEY,
 	VmId TEXT,
@@ -135,7 +136,7 @@ $Query = "CREATE TABLE VirtualMachine (
 Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
 # OSProfile
-$Query = "CREATE TABLE OSProfile (
+$Query = "CREATE TABLE OSProfiles (
 	ComputerName TEXT,
 	AdminUsername TEXT,
 	AdminPassword TEXT,
@@ -154,7 +155,7 @@ Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
 # Subnets
 # TODO: Create RouteTable TABLE
-$Query = "CREATE TABLE Subnet (
+$Query = "CREATE TABLE Subnets (
 	AddressPrefix TEXT,
 	IpConfigurations TEXT,
 	ServiceAssociationLinks TEXT,
@@ -186,7 +187,7 @@ $Query = "CREATE TABLE Subnet (
 Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
 #Network Interfaces
-$Query = "CREATE TABLE NetworkInterface (
+$Query = "CREATE TABLE NetworkInterfaces (
 	VirtualMachine TEXT, 
 	IpConfigurations TEXT, 
 	TapConfigurations TEXT, 
@@ -219,7 +220,7 @@ $Query = "CREATE TABLE NetworkInterface (
 Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
 # Virtual Networks
-$Query = "CREATE TABLE VirtualNetwork (
+$Query = "CREATE TABLE VirtualNetworks (
 	AddressSpace TEXT,
 	DhcpOptions TEXT,
 	Subnets TEXT,
@@ -248,7 +249,7 @@ $Query = "CREATE TABLE VirtualNetwork (
 
 Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
-$Query = "CREATE TABLE WebApp (
+$Query = "CREATE TABLE WebApps (
 	GitRemoteName TEXT,
 	GitRemoteUri TEXT,
 	GitRemoteUsername TEXT,
@@ -299,7 +300,7 @@ Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
 # Application Gateways
 
-$Query = "CREATE TABLE ApplicationGateway (
+$Query = "CREATE TABLE ApplicationGateways (
 	Sku TEXT,
 	SslPolicy TEXT,
 	GatewayIPConfigurations TEXT,
@@ -348,8 +349,7 @@ $Query = "CREATE TABLE ApplicationGateway (
 Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
 # Firewalls
-
-$Query = "CREATE TABLE Firewall (
+$Query = "CREATE TABLE Firewalls (
 	IpConfigurations TEXT,
 	ApplicationRuleCollections TEXT,
 	NatRuleCollections TEXT,
@@ -372,11 +372,104 @@ $Query = "CREATE TABLE Firewall (
 
 Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
+# Public IPs
+# TODO add IPAddress as Foreign key to 
+$Query = "CREATE TABLE PublicIPs (
+	PublicIpAllocationMethod TEXT,
+	Sku TEXT,
+	IpConfiguration TEXT,
+	DnsSettings TEXT,
+	IpTags TEXT,
+	IpAddress TEXT,
+	PublicIpAddressVersion TEXT,
+	IdleTimeoutInMinutes TEXT,
+	Zones TEXT,
+	ProvisioningState TEXT,
+	PublicIpPrefix TEXT,
+	IpConfigurationText TEXT,
+	DnsSettingsText TEXT,
+	IpTagsText TEXT,
+	SkuText TEXT,
+	PublicIpPrefixText TEXT,
+	ResourceGroupName TEXT,
+	Location TEXT,
+	ResourceGuid TEXT,
+	Type TEXT,
+	Tag TEXT,
+	TagsTable TEXT,
+	Name TEXT,
+	Etag TEXT,
+	Id TEXT PRIMARY KEY
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
+#Load Balancers
+$Query = "CREATE TABLE LoadBalancers (
+	BackendAddressPools TEXT,
+	BackendAddressPoolsText TEXT,
+	Etag                    TEXT,
+	FrontendIpConfigurations TEXT,
+	FrontendIpConfigurationsText TEXT,
+	Id                  	TEXT PRIMARY KEY,
+	InboundNatPools         TEXT,
+	InboundNatPoolsText     TEXT,
+	InboundNatRules         TEXT,
+	InboundNatRulesText     TEXT,
+	LoadBalancingRules      TEXT,
+	LoadBalancingRulesText  TEXT,
+	Location                TEXT,
+	Name                    TEXT,
+	OutboundRules           TEXT,
+	OutboundRulesText       TEXT,
+	Probes                  TEXT,
+	ProbesText              TEXT,
+	ProvisioningState       TEXT,
+	ResourceGroupName       TEXT,
+	ResourceGuid            TEXT,
+	Sku                     TEXT,
+	SkuText                 TEXT,
+	Tag                     TEXT,
+	TagsTable               TEXT,
+	Type                    TEXT
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
+# FrontendIPConfigurations
+$Query = "CREATE TABLE FrontendIPConfigurations (
+Etag TEXT,
+Id TEXT PRIMARY KEY,
+InboundNatPools TEXT,
+InboundNatPoolsText TEXT,
+InboundNatRules TEXT,
+InboundNatRulesText TEXT,
+LoadBalancingRules TEXT,
+LoadBalancingRulesText TEXT,
+Name TEXT,
+OutboundRules TEXT,
+OutboundRulesText TEXT,
+PrivateIpAddress TEXT,
+PrivateIpAllocationMethod TEXT,
+ProvisioningState TEXT,
+PublicIpAddress TEXT,
+PublicIpAddressText TEXT,
+PublicIPPrefix TEXT,
+PublicIPPrefixText TEXT,
+Subnet TEXT,
+SubnetText TEXT,
+Zones TEXT,
+ZonesText TEXT,
+LoadId TEXT,
+FOREIGN KEY(LoadId) REFERENCES LoadBalancers(Id)
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 # Inserting Data 
 $groups = Get-AzureRmNetworkSecurityGroup
 
 foreach($group in $groups){
-	$Query = 'INSERT INTO NetworkSecurityGroup (SecurityRules, DefaultSecurityRules, NetworkInterfaces, Subnets, ProvisioningState,SecurityRulesText, DefaultSecurityRulesText, NetworkInterfacesText, SubnetsText, ResourceGroupName, Location, ResourceGuid, Type, Tag, TagsTable, Name, Etag, Id)  
+	$Query = 'INSERT INTO NetworkSecurityGroups (SecurityRules, DefaultSecurityRules, NetworkInterfaces, Subnets, ProvisioningState,SecurityRulesText, DefaultSecurityRulesText, NetworkInterfacesText, SubnetsText, ResourceGroupName, Location, ResourceGuid, Type, Tag, TagsTable, Name, Etag, Id)  
 	VALUES ("' + (encode($group.SecurityRules.Id)) 
 	$Query += '", "' + (encode($group.DefaultSecurityRules.Id)) 
 	$Query += '", "' + (encode($group.NetworkInterfaces.Id)) 
@@ -454,7 +547,7 @@ foreach($group in $groups){
 $vms = Get-AzureRmVM
 
 foreach($vm in $vms){
-		$Query = 'INSERT INTO VirtualMachine (ResourceGroupName, Id, VmId, Name, Type, Location, LicenseType, Tags, AvailabilitySetReference, DiagnosticsProfile, Extensions, HardwareProfile, InstanceView, NetworkProfile, OSProfile, Plan, ProvisioningState, StorageProfile, Identity, Zones, FullyQualifiedDomainName, AdditionalCapabilities, RequestId, StatusCode) 
+		$Query = 'INSERT INTO VirtualMachines (ResourceGroupName, Id, VmId, Name, Type, Location, LicenseType, Tags, AvailabilitySetReference, DiagnosticsProfile, Extensions, HardwareProfile, InstanceView, NetworkProfile, OSProfile, Plan, ProvisioningState, StorageProfile, Identity, Zones, FullyQualifiedDomainName, AdditionalCapabilities, RequestId, StatusCode) 
 		VALUES ("' + $vm.ResourceGroupName
 		$Query += '", "' + $vm.Id
 		$Query += '", "' + $vm.VmId
@@ -483,7 +576,7 @@ foreach($vm in $vms){
 	Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
 	# OSProfile
-	$Query = 'INSERT INTO OSProfile(	
+	$Query = 'INSERT INTO OSProfiles(	
 	ComputerName,
 	AdminUsername,
 	AdminPassword,
@@ -515,7 +608,7 @@ foreach($vm in $vms){
 $interfaces = Get-AzureRmNetworkInterface
 foreach($interface in $interfaces){
 
-	$Query = 'INSERT INTO NetworkInterface(	
+	$Query = 'INSERT INTO NetworkInterfaces(	
 	VirtualMachine, 
 	IpConfigurations, 
 	TapConfigurations, 
@@ -541,7 +634,7 @@ foreach($interface in $interfaces){
 	Name, 
 	Etag, 
 	Id)  
-	VALUES ("' + (encode($interface.VirtualMachine)) 
+	VALUES ("' + (encode($interface.VirtualMachine.Id)) 
 	$Query += '", "' + (encode($interface.IpConfigurations)) 
 	$Query += '", "' + (encode($interface.TapConfigurations)) 
 	# Create Table for DnsSettings
@@ -576,7 +669,7 @@ foreach($interface in $interfaces){
 
 $networks = Get-AzureRmVirtualNetwork
 foreach($network in $networks){
-	$Query = 'INSERT INTO VirtualNetwork (
+	$Query = 'INSERT INTO VirtualNetworks (
 		AddressSpace,
 		DhcpOptions,
 		ProvisioningState,
@@ -629,7 +722,7 @@ foreach($network in $networks){
 	Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 	
 	foreach($subnet in $network.Subnets){
-		$Query = 'INSERT INTO Subnet (
+		$Query = 'INSERT INTO Subnets (
 	AddressPrefix,
 	IpConfigurations,
 	ServiceAssociationLinks,
@@ -688,7 +781,7 @@ foreach($network in $networks){
 # Web Apps
 $apps = Get-AzureRmWebApp
 foreach($app in $apps){
-	$Query = 'INSERT INTO WebApp(	
+	$Query = 'INSERT INTO WebApps(	
 		GitRemoteName,
 		GitRemoteUri,
 		GitRemoteUsername,
@@ -787,7 +880,7 @@ foreach($app in $apps){
 # Application Gateway
 $gateways = Get-AzureRmApplicationGateway
 foreach($gate in $gateways){
-	$Query = 'INSERT INTO ApplicationGateway(	
+	$Query = 'INSERT INTO ApplicationGateways(	
 		Sku,
 		SslPolicy,
 		GatewayIPConfigurations,
@@ -885,7 +978,7 @@ foreach($gate in $gateways){
 $firewalls = Get-AzureRmFirewall
 foreach($wall in $firewalls){
 
-$Query = 'INSERT INTO Firewall(	
+$Query = 'INSERT INTO Firewalls(	
 	IpConfigurations,
 	ApplicationRuleCollections,
 	NatRuleCollections,
@@ -926,4 +1019,179 @@ $Query = 'INSERT INTO Firewall(
 	$Query += '")'
 	
 	Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+}
+
+# Public IPs
+$ips = Get-AzureRmPublicIpAddress
+foreach($ip in $ips){
+	$Query = 'INSERT INTO PublicIPs(	
+		PublicIpAllocationMethod,
+		Sku,
+		IpConfiguration,
+		DnsSettings,
+		IpTags,
+		IpAddress,
+		PublicIpAddressVersion,
+		IdleTimeoutInMinutes,
+		Zones,
+		ProvisioningState,
+		PublicIpPrefix,
+		IpConfigurationText,
+		DnsSettingsText,
+		IpTagsText,
+		SkuText,
+		PublicIpPrefixText,
+		ResourceGroupName,
+		Location,
+		ResourceGuid,
+		Type,
+		Tag,
+		TagsTable,
+		Name,
+		Etag,
+		Id)
+		VALUES ("' 
+		$Query += (encode($ip.PublicIpAllocationMethod)) 
+		$Query += '", "' + (encode($ip.Sku)) 
+		$Query += '", "' + (encode($ip.IpConfiguration)) 
+		$Query += '", "' + (encode($ip.DnsSettings)) 
+		$Query += '", "' + (encode($ip.IpTags)) 
+		$Query += '", "' + (encode($ip.IpAddress)) 
+		$Query += '", "' + (encode($ip.PublicIpAddressVersion)) 
+		$Query += '", "' + (encode($ip.IdleTimeoutInMinutes)) 
+		$Query += '", "' + (encode($ip.Zones)) 
+		$Query += '", "' + (encode($ip.ProvisioningState)) 
+		$Query += '", "' + (encode($ip.PublicIpPrefix)) 
+		$Query += '", "' + (encode($ip.IpConfigurationText)) 
+		$Query += '", "' + (encode($ip.DnsSettingsText)) 
+		$Query += '", "' + (encode($ip.IpTagsText)) 
+		$Query += '", "' + (encode($ip.SkuText)) 
+		$Query += '", "' + (encode($ip.PublicIpPrefixText)) 
+		$Query += '", "' + (encode($ip.ResourceGroupName)) 
+		$Query += '", "' + (encode($ip.Location)) 
+		$Query += '", "' + (encode($ip.ResourceGuid)) 
+		$Query += '", "' + (encode($ip.Type)) 
+		$Query += '", "' + (encode($ip.Tag)) 
+		$Query += '", "' + (encode($ip.TagsTable)) 
+		$Query += '", "' + (encode($ip.Name)) 
+		$Query += '", "' + (encode($ip.Etag)) 
+		$Query += '", "' + (encode($ip.Id)) 
+		$Query += '")'
+		
+		Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+}
+
+# Load Balancer
+$loadbalancers = Get-AzureRmLoadBalancer
+foreach($load in $loadbalancers){
+	$Query = 'INSERT INTO LoadBalancers(	
+		BackendAddressPools,
+		BackendAddressPoolsText,
+		Etag,
+		FrontendIpConfigurations,
+		FrontendIpConfigurationsText,
+		Id,
+		InboundNatPools,
+		InboundNatPoolsText,
+		InboundNatRules,
+		InboundNatRulesText,
+		LoadBalancingRules,
+		LoadBalancingRulesText,
+		Location,
+		Name,
+		OutboundRules,
+		OutboundRulesText,
+		Probes,
+		ProbesText,
+		ProvisioningState,
+		ResourceGroupName,
+		ResourceGuid,
+		Sku,
+		SkuText,
+		Tag,
+		TagsTable,
+		Type)
+		VALUES ("' 
+		$Query += (encode($load.BackendAddressPools)) 
+		$Query += '", "' + (encode($load.BackendAddressPoolsText)) 
+		$Query += '", "' + (encode($load.Etag)) 
+		$Query += '", "' + (encode($load.FrontendIPConfigurations.PublicIpAddress.Id)) 
+		$Query += '", "' + (encode($load.FrontendIpConfigurationsText)) 
+		$Query += '", "' + (encode($load.Id)) 
+		$Query += '", "' + (encode($load.InboundNatPools)) 
+		$Query += '", "' + (encode($load.InboundNatPoolsText)) 
+		$Query += '", "' + (encode($load.InboundNatRules)) 
+		$Query += '", "' + (encode($load.InboundNatRulesText)) 
+		$Query += '", "' + (encode($load.LoadBalancingRules)) 
+		$Query += '", "' + (encode($load.LoadBalancingRulesText)) 
+		$Query += '", "' + (encode($load.Location)) 
+		$Query += '", "' + (encode($load.Name)) 
+		$Query += '", "' + (encode($load.OutboundRules)) 
+		$Query += '", "' + (encode($load.OutboundRulesText)) 
+		$Query += '", "' + (encode($load.Probes)) 
+		$Query += '", "' + (encode($load.ProbesText)) 
+		$Query += '", "' + (encode($load.ProvisioningState)) 
+		$Query += '", "' + (encode($load.ResourceGroupName)) 
+		$Query += '", "' + (encode($load.ResourceGuid)) 
+		$Query += '", "' + (encode($load.Sku)) 
+		$Query += '", "' + (encode($load.SkuText)) 
+		$Query += '", "' + (encode($load.Tag)) 
+		$Query += '", "' + (encode($load.TagsTable)) 
+		$Query += '", "' + (encode($load.Type)) 
+		$Query += '")'
+		
+		Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+		
+		foreach($front in $load.FrontendIPConfigurations){
+		$Query = 'INSERT INTO FrontendIPConfigurations(	
+		Etag ,
+		Id,
+		InboundNatPools ,
+		InboundNatPoolsText ,
+		InboundNatRules ,
+		InboundNatRulesText ,
+		LoadBalancingRules ,
+		LoadBalancingRulesText ,
+		Name ,
+		OutboundRules ,
+		OutboundRulesText ,
+		PrivateIpAddress ,
+		PrivateIpAllocationMethod ,
+		ProvisioningState ,
+		PublicIpAddress ,
+		PublicIpAddressText ,
+		PublicIPPrefix ,
+		PublicIPPrefixText ,
+		Subnet ,
+		SubnetText ,
+		Zones ,
+		ZonesText ,
+		LoadId)
+		VALUES ("' 
+		$Query += (encode($front.Etag)) 
+		$Query += '", "' + (encode($front.Id)) 
+		$Query += '", "' + (encode($front.InboundNatPools)) 
+		$Query += '", "' + (encode($front.InboundNatPoolsText)) 
+		$Query += '", "' + (encode($front.InboundNatRules)) 
+		$Query += '", "' + (encode($front.InboundNatRulesText)) 
+		$Query += '", "' + (encode($front.LoadBalancingRules)) 
+		$Query += '", "' + (encode($front.LoadBalancingRulesText)) 
+		$Query += '", "' + (encode($front.Name)) 
+		$Query += '", "' + (encode($front.OutboundRules)) 
+		$Query += '", "' + (encode($front.OutboundRulesText)) 
+		$Query += '", "' + (encode($front.PrivateIpAddress)) 
+		$Query += '", "' + (encode($front.PrivateIpAllocationMethod)) 
+		$Query += '", "' + (encode($front.ProvisioningState)) 
+		$Query += '", "' + (encode($front.PublicIpAddress.Id)) 
+		$Query += '", "' + (encode($front.PublicIpAddressText)) 
+		$Query += '", "' + (encode($front.PublicIPPrefix)) 
+		$Query += '", "' + (encode($front.PublicIpPrefixText)) 
+		$Query += '", "' + (encode($front.Subnet)) 
+		$Query += '", "' + (encode($front.SubnetText)) 
+		$Query += '", "' + (encode($front.Zones)) 
+		$Query += '", "' + (encode($front.ZonesText)) 
+		$Query += '", "' + (encode($load.Id)) 
+		$Query += '")'
+		Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+		}
 }
