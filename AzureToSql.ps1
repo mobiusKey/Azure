@@ -514,6 +514,120 @@ FOREIGN KEY(GatewayId) REFERENCES ApplicationGateways(Id)
 
 Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
+#Need To Create Inserts for these TABLEs
+#NetworkInterfaceIpConfigurations
+$Query = "CREATE TABLE NetworkInterfaceIpConfigurations(
+Id TEXT PRIMARY KEY,
+ApplicationGatewayAddressPools TEXT,
+ApplicationGatewayAddressPoolsText TEXT,
+ApplicationSecurityGroups TEXT,
+ApplicationSecurityGroupsText TEXT,
+Etag TEXT,
+LoadBalancerBackendAddressPools TEXT,
+LoadBalancerBackendAddressPoolsText TEXT,
+LoadBalancerInboundNatRules TEXT,
+LoadBalancerInboundNatRulesText TEXT,
+Name TEXT,
+PrimaryBool TEXT,
+PrivateIpAddress TEXT,
+PrivateIpAllocationMethod TEXT,
+ProvisioningState TEXT,
+PublicIpAddress TEXT,
+PublicIpAddressText TEXT,
+Subnet TEXT,
+SubnetText
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
+#ApplicationGatewayWebApplicationFirewallConfigurations
+$Query = "CREATE TABLE ApplicationGatewayWebApplicationFirewallConfigurations(
+Id TEXT PRIMARY KEY,
+DisableRuleGroups TEXT,
+DisableRuleGroupsText TEXT,
+Enabled TEXT,
+Exclusions TEXT,
+ExclusionsText TEXT,
+FileUploadLimitMb TEXT,
+FirewallMode TEXT,
+MaxRequestBodySizeinKb TEXT,
+RequestBodyCheck TEXT,
+RuleSetType TEXT,
+RuleSetVersion TEXT
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
+# ApplicationGatewayFrontendIpConfigurations
+$Query = "CREATE TABLE ApplicationGatewayFrontendIpConfigurations(
+Id TEXT PRIMARY KEY,
+Etag TEXT,
+InboundNatPools TEXT,
+InboundNatPoolsText TEXT,
+InboundNatRules TEXT,
+InboundNatRulesText TEXT,
+LoadBalancingRules TEXT,
+LoadBalancingRulesText TEXT,
+Name TEXT,
+OutboundRules TEXT,
+OutboundRulesText TEXT,
+PrivateIpAddress TEXT,
+PrivateIpAllocationMethod TEXT,
+ProvisioningState TEXT,
+PublicIpAddress TEXT,
+PublicIpAddressText TEXT,
+PublicIPPrefix TEXT,
+PublicIPPrefixText TEXT,
+Subnet TEXT,
+SubnetText TEXT,
+Zones TEXT,
+ZonesText TEXT
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
+# ApplicationBackendAddressPools
+$Query = "CREATE TABLE ApplicationBackendAddressPools(
+Id TEXT PRIMARY KEY,
+BackendAddresses TEXT,
+BackendAddressesText TEXT,
+BackendIpConfigurations TEXT,
+BackendIpConfigurationsText TEXT,
+Etag TEXT,
+Name TEXT,
+ProvisioningState TEXT,
+Type TEXT
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
+#FirewallIpConfigurations
+$Query = "CREATE TABLE FirewallIpConfigurations(
+Id TEXT PRIMARY KEY,
+Etag TEXT,
+Name TEXT,
+PrivateIpAddress TEXT,
+PublicIpAddress TEXT,
+PublicIpAddressText TEXT,
+Subnet TEXT,
+SubnetText TEXT
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
+#GatewayIpConfigurations
+$Query = "CREATE TABLE GatewayIpConfigurations(
+Id TEXT PRIMARY KEY,
+Etag TEXT,
+Name TEXT,
+ProvisioningState TEXT,
+Subnet TEXT,
+SubnetText TEXT,
+Type TEXT
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
 # Inserting Data 
 $groups = Get-AzureRmNetworkSecurityGroup
 
