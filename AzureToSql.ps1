@@ -1,4 +1,5 @@
 # Install-Module PSSQLite
+# Install-Module AzureRm
 # Import-Module
 
 # Note that most values are never NULL but are of length 0
@@ -436,6 +437,33 @@ $Query = "CREATE TABLE LoadBalancers (
 
 Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
+# IpConfigurations
+$Query = "CREATE TABLE IpConfigurations (
+	ApplicationGatewayBackendAddressPools                TEXT,
+	ApplicationGatewayBackendAddressPoolsText            TEXT,
+	ApplicationSecurityGroups                            TEXT,
+	ApplicationSecurityGroupsText                        TEXT,
+	Etag                                                 TEXT,
+	Id                                                   TEXT PRIMARY KEY,
+	LoadBalancerBackendAddressPools                      TEXT,
+	LoadBalancerBackendAddressPoolsText                  TEXT,
+	LoadBalancerInboundNatRules                          TEXT,
+	LoadBalancerInboundNatRulesText                      TEXT,
+	Name                                                 TEXT,
+	PrimaryBool                                              TEXT,
+	PrivateIpAddress                                     TEXT,
+	PrivateIpAddressVersion                              TEXT,
+	PrivateIpAllocationMethod                            TEXT,
+	ProvisioningState                                    TEXT,
+	PublicIpAddress                                      TEXT,
+	PublicIpAddressText                                  TEXT,
+	Subnet                                               TEXT,
+	SubnetText                                           TEXT,
+	NetworkInterface TEXT
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
 # FrontendIPConfigurations
 $Query = "CREATE TABLE FrontendIPConfigurations (
 Etag TEXT,
@@ -465,6 +493,27 @@ FOREIGN KEY(LoadId) REFERENCES LoadBalancers(Id)
 )"
 
 Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
+
+
+# ApplicationGatewayFrontendIPConfigurations
+$Query = "CREATE TABLE ApplicationGatewayFrontendIPConfigurations (
+Etag TEXT,
+Id TEXT PRIMARY KEY,
+Name TEXT,
+PrivateIpAddress TEXT,
+PrivateIpAllocationMethod TEXT,
+ProvisioningState TEXT,
+PublicIpAddress TEXT,
+PublicIpAddressText TEXT,
+Subnet TEXT,
+SubnetText TEXT,
+GatewayId TEXT,
+FOREIGN KEY(GatewayId) REFERENCES ApplicationGateways(Id)
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
 # Inserting Data 
 $groups = Get-AzureRmNetworkSecurityGroup
 
@@ -601,7 +650,8 @@ foreach($vm in $vms){
 	
 	Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 	# TODO: StorageProfile
-}
+
+	}
 
 # Network Interfaces
 
@@ -662,7 +712,55 @@ foreach($interface in $interfaces){
 	$Query += '", "' + (encode($interface.Id)) + '")'
 	
 	Invoke-SqliteQuery -DataSource $DataSource -Query $Query
-
+	
+	foreach($ip in $interface.IpConfigurations){
+		$Query = 'INSERT INTO IpConfigurations(	
+	ApplicationGatewayBackendAddressPools,
+	ApplicationGatewayBackendAddressPoolsText,
+	ApplicationSecurityGroups,
+	ApplicationSecurityGroupsText,
+	Etag,
+	Id,
+	LoadBalancerBackendAddressPools,
+	LoadBalancerBackendAddressPoolsText,
+	LoadBalancerInboundNatRules,
+	LoadBalancerInboundNatRulesText,
+	Name,
+	PrimaryBool,
+	PrivateIpAddress,
+	PrivateIpAddressVersion,
+	PrivateIpAllocationMethod,
+	ProvisioningState,
+	PublicIpAddress,
+	PublicIpAddressText,
+	Subnet,
+	SubnetText,
+	NetworkInterface)  
+	VALUES ("' + (encode($ip.ApplicationGatewayBackendAddressPools)) 
+	$Query += '", "' + (encode($ip.ApplicationGatewayBackendAddressPoolsText)) 
+	$Query += '", "' + (encode($ip.ApplicationSecurityGroups)) 
+	$Query += '", "' + (encode($ip.ApplicationSecurityGroupsText)) 
+	$Query += '", "' + (encode($ip.Etag)) 
+	$Query += '", "' + (encode($ip.Id)) 
+	$Query += '", "' + (encode($ip.LoadBalancerBackendAddressPools)) 
+	$Query += '", "' + (encode($ip.LoadBalancerBackendAddressPoolsText)) 
+	$Query += '", "' + (encode($ip.LoadBalancerInboundNatRules)) 
+	$Query += '", "' + (encode($ip.LoadBalancerInboundNatRulesText)) 
+	$Query += '", "' + (encode($ip.Name)) 
+	$Query += '", "' + (encode($ip.Primary)) 
+	$Query += '", "' + (encode($ip.PrivateIpAddress)) 
+	$Query += '", "' + (encode($ip.PrivateIpAddressVersion)) 
+	$Query += '", "' + (encode($ip.PrivateIpAllocationMethod)) 
+	$Query += '", "' + (encode($ip.ProvisioningState)) 
+	$Query += '", "' + (encode($ip.PublicIpAddress.Id)) 
+	$Query += '", "' + (encode($ip.PublicIpAddressText)) 
+	$Query += '", "' + (encode($ip.Subnet.Id)) 
+	$Query += '", "' + (encode($ip.SubnetText)) 
+	$Query += '", "' + (encode($ip.NetworkInterface)) 
+	$Query += '")'
+	
+	Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+	}
 }
 
 # Virtual Networks
@@ -1186,7 +1284,7 @@ foreach($load in $loadbalancers){
 		$Query += '", "' + (encode($front.PublicIpAddressText)) 
 		$Query += '", "' + (encode($front.PublicIPPrefix)) 
 		$Query += '", "' + (encode($front.PublicIpPrefixText)) 
-		$Query += '", "' + (encode($front.Subnet)) 
+		$Query += '", "' + (encode($front.Subnet.Id)) 
 		$Query += '", "' + (encode($front.SubnetText)) 
 		$Query += '", "' + (encode($front.Zones)) 
 		$Query += '", "' + (encode($front.ZonesText)) 
