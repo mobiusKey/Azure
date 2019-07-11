@@ -437,8 +437,8 @@ $Query = "CREATE TABLE LoadBalancers (
 
 Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
-# IpConfigurations
-$Query = "CREATE TABLE IpConfigurations (
+# NetworkInterfaceIpConfigurations
+$Query = "CREATE TABLE NetworkInterfaceIpConfigurations (
 	ApplicationGatewayBackendAddressPools                TEXT,
 	ApplicationGatewayBackendAddressPoolsText            TEXT,
 	ApplicationSecurityGroups                            TEXT,
@@ -496,50 +496,7 @@ Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
 
 
-# ApplicationGatewayFrontendIPConfigurations
-$Query = "CREATE TABLE ApplicationGatewayFrontendIPConfigurations (
-Etag TEXT,
-Id TEXT PRIMARY KEY,
-Name TEXT,
-PrivateIpAddress TEXT,
-PrivateIpAllocationMethod TEXT,
-ProvisioningState TEXT,
-PublicIpAddress TEXT,
-PublicIpAddressText TEXT,
-Subnet TEXT,
-SubnetText TEXT,
-GatewayId TEXT,
-FOREIGN KEY(GatewayId) REFERENCES ApplicationGateways(Id)
-)"
-
-Invoke-SqliteQuery -DataSource $DataSource -Query $Query
-
 #Need To Create Inserts for these TABLEs
-#NetworkInterfaceIpConfigurations
-$Query = "CREATE TABLE NetworkInterfaceIpConfigurations(
-Id TEXT PRIMARY KEY,
-ApplicationGatewayAddressPools TEXT,
-ApplicationGatewayAddressPoolsText TEXT,
-ApplicationSecurityGroups TEXT,
-ApplicationSecurityGroupsText TEXT,
-Etag TEXT,
-LoadBalancerBackendAddressPools TEXT,
-LoadBalancerBackendAddressPoolsText TEXT,
-LoadBalancerInboundNatRules TEXT,
-LoadBalancerInboundNatRulesText TEXT,
-Name TEXT,
-PrimaryBool TEXT,
-PrivateIpAddress TEXT,
-PrivateIpAllocationMethod TEXT,
-ProvisioningState TEXT,
-PublicIpAddress TEXT,
-PublicIpAddressText TEXT,
-Subnet TEXT,
-SubnetText
-)"
-
-Invoke-SqliteQuery -DataSource $DataSource -Query $Query
-
 #ApplicationGatewayWebApplicationFirewallConfigurations
 $Query = "CREATE TABLE ApplicationGatewayWebApplicationFirewallConfigurations(
 Id TEXT PRIMARY KEY,
@@ -627,6 +584,56 @@ Type TEXT
 )"
 
 Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
+#StorageProfile
+# Id is the same as the VirtualMachine Id
+$Query = "CREATE TABLE StorageProfiles(
+Id TEXT PRIMARY KEY, 
+DataDisks TEXT,
+ImageReference TEXT,
+OSDisk TEXT
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
+$Query = "CREATE TABLE DataDisks(
+Id INTEGER PRIMARY KEY, 
+Caching TEXT,
+CreateOption TEXT,
+DiskSizeGB TEXT,
+Image TEXT,
+Lun TEXT,
+ManagedDisk TEXT,
+Name TEXT,
+ToBeDetached TEXT,
+Vhd TEXT,
+WriteAcceleratorEnabled TEXT,
+StorageProfileId TEXT,
+FOREIGN KEY(StorageProfileId) REFERENCES StorageProfile(Id)
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
+$Query = "CREATE TABLE ImageReferences(
+Id INTEGER PRIMARY KEY, 
+DataDisks TEXT,
+ImageReference TEXT,
+OSDisk TEXT
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
+$Query = "CREATE TABLE OSDisks(
+UId INTEGER PRIMARY KEY, 
+Offer TEXT,
+Sku TEXT,
+Publisher TEXT,
+Id TEXT,
+Version TEXT
+)"
+
+Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+
 
 # Inserting Data 
 $groups = Get-AzureRmNetworkSecurityGroup
@@ -763,9 +770,70 @@ foreach($vm in $vms){
 	# TODO go down the rest of the rabbit hole that is Linux and Windows Configs
 	
 	Invoke-SqliteQuery -DataSource $DataSource -Query $Query
-	# TODO: StorageProfile
-
-	}
+	
+	$Query = 'INSERT INTO StorageProfiles(	
+	DataDisks,
+	ImageReference,
+	OSDisk)  
+	VALUES ("' 
+	$Query += (arrayToString($vm.StorageProfile.DataDisks)) 
+	$Query += '", "' + (encode($vm.StorageProfile.ImageReference)) 
+	$Query += '", "' + (encode($vm.StorageProfile.OSDisk))
+	$Query += '")'
+	
+	Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+	
+	
+	$Query = 'INSERT INTO DataDisks(	
+	Caching,
+	CreateOption,
+	DiskSizeGB,
+	Image,
+	Lun,
+	ManagedDisk,
+	Name,
+	ToBeDetached,
+	Vhd,
+	WriteAcceleratorEnabled
+	)  
+	VALUES ("' 
+	$Query += (encode($vm.StorageProfile.DataDisks.Caching)) 
+	$Query += (encode($vm.StorageProfile.DataDisks.CreateOption)) 
+	$Query += (encode($vm.StorageProfile.DataDisks.DiskSizeGB)) 
+	$Query += (encode($vm.StorageProfile.DataDisks.Image)) 
+	$Query += (encode($vm.StorageProfile.DataDisks.Lun)) 
+	$Query += (encode($vm.StorageProfile.DataDisks.ManagedDisk)) 
+	$Query += (encode($vm.StorageProfile.DataDisks.Name)) 
+	$Query += (encode($vm.StorageProfile.DataDisks.ToBeDetached)) 
+	$Query += (encode($vm.StorageProfile.DataDisks.Vhd)) 
+	$Query += (encode($vm.StorageProfile.DataDisks.WriteAcceleratorEnabled)) 
+	$Query += '")'
+	
+	Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+	
+	<# $Query = 'INSERT INTO ImageReferences(	
+	DataDisks,
+	ImageReference,
+	OSDisk)  
+	VALUES ("' 
+	$Query += (arrayToString($vm.StorageProfile.DataDisks)) 
+	$Query += '", "' + (encode($vm.StorageProfile.ImageReference)) 
+	$Query += '", "' + (encode($vm.StorageProfile.OSDisk))
+	$Query += '")'
+	
+	Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+	$Query = 'INSERT INTO OSDisk(	
+	DataDisks,
+	ImageReference,
+	OSDisk)  
+	VALUES ("' 
+	$Query += (arrayToString($vm.StorageProfile.DataDisks)) 
+	$Query += '", "' + (encode($vm.StorageProfile.ImageReference)) 
+	$Query += '", "' + (encode($vm.StorageProfile.OSDisk))
+	$Query += '")'
+	
+	Invoke-SqliteQuery -DataSource $DataSource -Query $Query #>
+}
 
 # Network Interfaces
 
@@ -828,7 +896,7 @@ foreach($interface in $interfaces){
 	Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 	
 	foreach($ip in $interface.IpConfigurations){
-		$Query = 'INSERT INTO IpConfigurations(	
+		$Query = 'INSERT INTO NetworkInterfaceIpConfigurations(	
 	ApplicationGatewayBackendAddressPools,
 	ApplicationGatewayBackendAddressPoolsText,
 	ApplicationSecurityGroups,
