@@ -1,0 +1,7 @@
+get security center recommendations
+Get IP Addresses with load balancers
+custom domain names
+
+
+# Get Web Apps not protected by a WAF
+# Check VM TABLE if Extensions is where endpoint protections are kept

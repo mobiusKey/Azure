@@ -1,5 +1,5 @@
 # Install-Module PSSQLite
-# Install-Module AzureRm
+# Install-Module AzureRm (Old Version new one is Az)
 # Import-Module
 
 # Note that most values are never NULL but are of length 0
@@ -13,15 +13,14 @@ function encode {
 }
 
 function arrayToString {
-	if($args[0] -ne $null){ 
 	$string = ""
-	$args[0]
+	if($args[0] -ne $null){ 
 	foreach($element in $args[0]){
-		$string += $element + " "
+		$string += $element.toString() + ", "
 	}
 	return $string
 	}
-	return "NULL"
+	return $null
 }
 
 $DataSource = Get-Location
@@ -643,7 +642,7 @@ foreach($group in $groups){
 	VALUES ("' + (encode($group.SecurityRules.Id)) 
 	$Query += '", "' + (encode($group.DefaultSecurityRules.Id)) 
 	$Query += '", "' + (encode($group.NetworkInterfaces.Id)) 
-	$Query += '", "' + (encode($group.Subnets.Id)) 
+	$Query += '", "' + (arrayToString($group.Subnets.Id)) 
 	$Query += '", "' + (encode($group.ProvisioningState))
 	$Query += '", "' + (encode($group.SecurityRulesText)) 
 	$Query += '", "' + (encode($group.DefaultSecurityRulesText)) 
@@ -659,7 +658,8 @@ foreach($group in $groups){
 	$Query += '", "' + (encode($group.Name))
 	$Query += '", "' + (encode($group.Etag))
 	$Query += '", "' + (encode($group.Id)) + '")'
-		Invoke-SqliteQuery -DataSource $DataSource -Query $Query
+	
+	Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
 	foreach($rule in $group.SecurityRules){
 
