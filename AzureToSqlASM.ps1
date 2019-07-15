@@ -1,6 +1,6 @@
 # Install-Module PSSQLite
-# Install-Module AzureRM -AllowClobber (Old Version new one is Az)
-# Import-Module AzureRM
+# Install-Module Az (Old Version new one is Az)
+# Import-Module
 
 # Note that most values are never NULL but are of length 0
 # TODO add Function Apps and API apps
@@ -635,7 +635,7 @@ Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 
 
 # Inserting Data 
-$groups = Get-AzureRmNetworkSecurityGroup
+$groups = Get-AzNetworkSecurityGroup
 
 foreach($group in $groups){
 	$Query = 'INSERT INTO NetworkSecurityGroups (SecurityRules, DefaultSecurityRules, NetworkInterfaces, Subnets, ProvisioningState,SecurityRulesText, DefaultSecurityRulesText, NetworkInterfacesText, SubnetsText, ResourceGroupName, Location, ResourceGuid, Type, Tag, TagsTable, Name, Etag, Id)  
@@ -714,7 +714,7 @@ foreach($group in $groups){
 }
 
 # VirtualMachines
-$vms = Get-AzureRmVM
+$vms = Get-AzVM
 
 foreach($vm in $vms){
 		$Query = 'INSERT INTO VirtualMachines (ResourceGroupName, Id, VmId, Name, Type, Location, LicenseType, Tags, AvailabilitySetReference, DiagnosticsProfile, Extensions, HardwareProfile, InstanceView, NetworkProfile, OSProfile, Plan, ProvisioningState, StorageProfile, Identity, Zones, FullyQualifiedDomainName, AdditionalCapabilities, RequestId, StatusCode) 
@@ -837,7 +837,7 @@ foreach($vm in $vms){
 
 # Network Interfaces
 
-$interfaces = Get-AzureRmNetworkInterface
+$interfaces = Get-AzNetworkInterface
 foreach($interface in $interfaces){
 
 	$Query = 'INSERT INTO NetworkInterfaces(	
@@ -947,7 +947,7 @@ foreach($interface in $interfaces){
 
 # Virtual Networks
 
-$networks = Get-AzureRmVirtualNetwork
+$networks = Get-AzVirtualNetwork
 foreach($network in $networks){
 	$Query = 'INSERT INTO VirtualNetworks (
 		AddressSpace,
@@ -1059,7 +1059,7 @@ foreach($network in $networks){
 }
 
 # Web Apps
-$apps = Get-AzureRmWebApp
+$apps = Get-AzWebApp
 foreach($app in $apps){
 	$Query = 'INSERT INTO WebApps(	
 		GitRemoteName,
@@ -1158,7 +1158,7 @@ foreach($app in $apps){
 }
 
 # Application Gateway
-$gateways = Get-AzureRmApplicationGateway
+$gateways = Get-AzApplicationGateway
 foreach($gate in $gateways){
 	$Query = 'INSERT INTO ApplicationGateways(	
 		Sku,
@@ -1255,7 +1255,7 @@ foreach($gate in $gateways){
 }
 
 # Firewalls
-$firewalls = Get-AzureRmFirewall
+$firewalls = Get-AzFirewall
 foreach($wall in $firewalls){
 
 $Query = 'INSERT INTO Firewalls(	
@@ -1302,7 +1302,7 @@ $Query = 'INSERT INTO Firewalls(
 }
 
 # Public IPs
-$ips = Get-AzureRmPublicIpAddress
+$ips = Get-AzPublicIpAddress
 foreach($ip in $ips){
 	$Query = 'INSERT INTO PublicIPs(	
 		PublicIpAllocationMethod,
@@ -1362,7 +1362,7 @@ foreach($ip in $ips){
 }
 
 # Load Balancer
-$loadbalancers = Get-AzureRmLoadBalancer
+$loadbalancers = Get-AzLoadBalancer
 foreach($load in $loadbalancers){
 	$Query = 'INSERT INTO LoadBalancers(	
 		BackendAddressPools,
@@ -1422,7 +1422,6 @@ foreach($load in $loadbalancers){
 		
 		Invoke-SqliteQuery -DataSource $DataSource -Query $Query
 		
-		# Add key for loadbalancers
 		foreach($front in $load.FrontendIPConfigurations){
 		$Query = 'INSERT INTO FrontendIPConfigurations(	
 		Etag ,
